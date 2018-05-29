@@ -20,6 +20,7 @@ class Grandstand:
         groups: dict with Group objects
         joints: dict with Joint objects for model nodes/joints
         areas: dict with Area objects for model elements/areas
+        cases: dict with OutputCase objects
     """
 
     def __init__(self):
@@ -54,7 +55,7 @@ class Group:
     """Element group.
 
     Attributes:
-        areas: list of area numbers
+        areas: list of area object numbers (not area numbers)
     """
 
     def __init__(self):
@@ -142,6 +143,7 @@ def load_sap2000_xml(xmlfile):
 
 
 if __name__ == '__main__':
+    """Read FEA output file and show model description."""
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile", help="FEA model source")
     args = parser.parse_args()
