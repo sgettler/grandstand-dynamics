@@ -7,6 +7,7 @@ structure and utility methods for loading FEA output files.
 
 import argparse
 from lxml import etree
+import time
 
 
 
@@ -73,12 +74,23 @@ class OutputCase:
         self.steps = {}
 
 
-def load_sap2000_xml(xmlfile):
+def load_sap2000_xml(xmlfile, verbose):
     """Load FEA model from SAP2000 XML results file."""
+    if verbose:
+        print("Scanning XML file...", end="", flush=True)
+        context = etree.iterparse(xmlfile, events=("start", "end"))
+        items = 0
+        for event, _ in context:
+            items += 1
+        print("done.", end="", flush=True)
+        xmlfile.seek(0)
+        progtime = time.time()
+
     g = Grandstand()
     context = etree.iterparse(xmlfile, events=("start", "end"))
     _, root = next(context)
     currenttag = None
+    i = 0
     for event, elem in context:
         if event == "start" and currenttag == None:
             currenttag = elem.tag
@@ -138,6 +150,17 @@ def load_sap2000_xml(xmlfile):
                     float(elem.find("Frequency").text)})
             currenttag = None
             root.clear()
+        i += 1
+        
+        if verbose and time.time() > progtime + 0.5:
+            prog = i/items
+            print("\rReading XML file: [{0:40s}] {1:.1f}%".format(\
+                "#"*int(prog*40), prog*100), end="", flush=True)
+            progtime = time.time()
+
+    if verbose:
+        print("\rReading XML file: [{0:40s}] 100.0%".format("#"*40))
+
     return g
 
 
@@ -146,10 +169,11 @@ if __name__ == '__main__':
     """Read FEA output file and show model description."""
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile", help="FEA model source")
+    parser.add_argument("--verbose", help="verbose mode", action="store_true")
     args = parser.parse_args()
 
     with open(args.inputfile, "rb") as xmlfile:
-        g = load_sap2000_xml(xmlfile)
+        g = load_sap2000_xml(xmlfile, args.verbose)
         print(len(g.joints),"joint(s) found")
         print(len(g.areas),"area(s) found")
         print(len(g.groups),"group(s) found:")
