@@ -77,7 +77,7 @@ class OutputCase:
 def load_sap2000_xml(xmlfile, verbose):
     """Load FEA model from SAP2000 XML results file."""
     if verbose:
-        print("Scanning XML file...", end="", flush=True)
+        print("Scanning XML file... ", end="", flush=True)
         context = etree.iterparse(xmlfile, events=("start", "end"))
         items = 0
         for event, _ in context:
@@ -151,15 +151,16 @@ def load_sap2000_xml(xmlfile, verbose):
             currenttag = None
             root.clear()
         i += 1
-        
+
         if verbose and time.time() > progtime + 0.5:
             prog = i/items
-            print("\rReading XML file: [{0:40s}] {1:.1f}%".format(\
+            print("\rReading XML file... [{0:40s}] {1:.1f}%".format(\
                 "#"*int(prog*40), prog*100), end="", flush=True)
             progtime = time.time()
 
     if verbose:
-        print("\rReading XML file: [{0:40s}] 100.0%".format("#"*40))
+        print("\rReading XML file... done."
+            "                                                ")
 
     return g
 
