@@ -8,6 +8,7 @@ structure and utility methods for loading FEA output files.
 import argparse
 from lxml import etree
 import time
+import numpy
 
 
 
@@ -29,6 +30,20 @@ class Grandstand:
         self.areas = {}
         self.groups = {}
         self.cases = {}
+
+    def get_shapes(self, outputCase):
+        """Create mode shape matrix."""
+        case = self.cases.get(outputCase)
+        shapes = numpy.empty([len(self.joints), len(case.steps)])
+        i = 0
+        for _, joint in self.joints.items():
+            j = 0
+            for stepNum, _ in case.steps.items():
+                shapes[i, j] = joint.cases.get(outputCase).steps.get(stepNum)
+                j += 1
+            i += 1
+        return shapes
+
 
 
 class Joint:
